@@ -1,46 +1,73 @@
-# Getting Started with Create React App
+# Tシャツデザインアプリ
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+ReactとHTML5 Canvasを使用したシンプルなTシャツデザイン作成ツールです。
 
-## Available Scripts
+## 機能
 
-In the project directory, you can run:
+- 📝 **テキスト追加・編集** - Tシャツにテキストを配置し、自由に移動可能
+- 🎨 **図形描画** - 四角形や円などの基本図形を追加
+- 🌈 **カラーパレット** - 豊富な色選択とカスタムカラー対応
+- 💾 **出力機能** - PNG画像またはPDFとしてデザインを保存
+- 🖱️ **直感的な操作** - ドラッグ&ドロップで要素を自由に配置
 
-### `npm start`
+## 使い方
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+1. **要素の追加**
+   - キャンバス下のボタンでテキストや図形を追加
+   - 左側のツールバーで色やフォントサイズを調整
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+2. **要素の編集**
+   - 要素をクリックして選択
+   - ドラッグして位置を変更
+   - 「削除」ボタンで不要な要素を削除
 
-### `npm test`
+3. **デザインの保存**
+   - 「PNG保存」ボタンで画像ファイルとしてダウンロード
+   - 「PDF保存」ボタンでPDFファイルとしてダウンロード
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## セットアップと実行
 
-### `npm run build`
+### 必要な環境
+- Node.js (v14以上)
+- npm
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### インストール
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```bash
+npm install
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 開発サーバーの起動
 
-### `npm run eject`
+```bash
+npm start
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+ブラウザで [http://localhost:3000](http://localhost:3000) を開いてアプリを確認できます。
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### プロダクションビルド
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+```bash
+npm run build
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+`build`フォルダにプロダクション用のファイルが生成されます。
 
-## Learn More
+## 技術スタック
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- **React** - UIフレームワーク
+- **TypeScript** - 型安全性
+- **HTML5 Canvas** - 描画エンジン
+- **jsPDF** - PDF出力
+- **Create React App** - プロジェクトセットアップ
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## ファイル構成
+
+```
+src/
+├── components/
+│   ├── DesignCanvas.tsx    # メインのキャンバスコンポーネント
+│   └── Toolbar.tsx         # ツールバーコンポーネント
+├── App.tsx                 # メインアプリケーション
+└── App.css                 # スタイルシート
+```
