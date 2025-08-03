@@ -62,10 +62,39 @@ const DesignCanvas: React.FC = () => {
       if (element.id === selectedElement) {
         ctx.strokeStyle = '#007bff';
         ctx.lineWidth = 2;
-        ctx.strokeRect(element.x - 5, element.y - 5, (element.width || 50) + 10, (element.height || 20) + 10);
+        if (element.type === 'text') {
+          const textWidth = getTextWidth(element.content || '', element.fontSize || 16);
+          const textHeight = element.fontSize || 16;
+          ctx.strokeRect(element.x - 2, element.y - textHeight - 2, textWidth + 4, textHeight + 4);
+        } else {
+          ctx.strokeRect(element.x - 2, element.y - 2, (element.width || 50) + 4, (element.height || 50) + 4);
+        }
       }
     });
   }, [elements, selectedElement]);
+
+  // ESCキーで選択解除
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSelectedElement(null);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  const getTextWidth = (text: string, fontSize: number): number => {
+    const canvas = canvasRef.current;
+    if (!canvas) return 100;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return 100;
+    ctx.font = `${fontSize}px Arial`;
+    return ctx.measureText(text).width;
+  };
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -75,17 +104,41 @@ const DesignCanvas: React.FC = () => {
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    // Find clicked element
+    console.log('Click at:', x, y); // デバッグ用
+
+    // Find clicked element with better hit detection
     const clickedElement = elements.find(element => {
-      return x >= element.x && x <= element.x + (element.width || 50) &&
-             y >= element.y - (element.fontSize || 16) && y <= element.y + (element.height || 20);
+      if (element.type === 'text') {
+        const textWidth = getTextWidth(element.content || '', element.fontSize || 16);
+        const textHeight = element.fontSize || 16;
+        const padding = 5; // 余白を少し減らす
+        const hit = x >= element.x - padding && x <= element.x + textWidth + padding &&
+                   y >= element.y - textHeight - padding && y <= element.y + padding;
+        console.log('Text element hit test:', element.content, hit, {
+          elementX: element.x,
+          elementY: element.y,
+          textWidth,
+          textHeight,
+          clickX: x,
+          clickY: y
+        }); // デバッグ用
+        return hit;
+      } else {
+        const hit = x >= element.x && x <= element.x + (element.width || 50) &&
+                   y >= element.y && y <= element.y + (element.height || 50);
+        console.log('Shape element hit test:', element.shapeType, hit); // デバッグ用
+        return hit;
+      }
     });
+
+    console.log('Clicked element:', clickedElement); // デバッグ用
 
     if (clickedElement) {
       setSelectedElement(clickedElement.id);
       setIsDragging(true);
       setDragOffset({ x: x - clickedElement.x, y: y - clickedElement.y });
     } else {
+      console.log('No element clicked, clearing selection'); // デバッグ用
       setSelectedElement(null);
     }
   };
@@ -111,6 +164,11 @@ const DesignCanvas: React.FC = () => {
 
   const handleCanvasMouseUp = () => {
     setIsDragging(false);
+  };
+
+  const handleCanvasMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    // マウスダウンで即座に選択処理を行う
+    handleCanvasClick(event);
   };
 
   const addTextElement = (text: string, color: string, fontSize: number) => {
@@ -171,7 +229,7 @@ const DesignCanvas: React.FC = () => {
         ref={canvasRef}
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
-        onClick={handleCanvasClick}
+        onMouseDown={handleCanvasMouseDown}
         onMouseMove={handleCanvasMouseMove}
         onMouseUp={handleCanvasMouseUp}
         style={{ border: '1px solid #ccc', cursor: isDragging ? 'grabbing' : 'grab' }}
@@ -185,6 +243,9 @@ const DesignCanvas: React.FC = () => {
         </button>
         <button onClick={() => addShapeElement('circle', '#000')}>
           円追加
+        </button>
+        <button onClick={() => setSelectedElement(null)} disabled={!selectedElement}>
+          選択解除
         </button>
         <button onClick={deleteSelectedElement} disabled={!selectedElement}>
           削除
