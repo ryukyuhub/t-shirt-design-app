@@ -14,7 +14,12 @@ interface DesignElement {
   shapeType?: 'rectangle' | 'circle';
 }
 
-const DesignCanvas: React.FC = () => {
+interface DesignCanvasProps {
+  selectedColor: string;
+  fontSize: number;
+}
+
+const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedColor, fontSize: globalFontSize }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [elements, setElements] = useState<DesignElement[]>([]);
   const [selectedElement, setSelectedElement] = useState<string | null>(null);
@@ -191,7 +196,7 @@ const DesignCanvas: React.FC = () => {
 
   const handleTextSubmit = () => {
     if (inputText.trim()) {
-      addTextElement(inputText, '#000', 16);
+      addTextElement(inputText, selectedColor, globalFontSize);
       setShowTextInput(false);
       setInputText('');
     }
@@ -238,10 +243,10 @@ const DesignCanvas: React.FC = () => {
         <button onClick={handleAddText}>
           テキスト追加
         </button>
-        <button onClick={() => addShapeElement('rectangle', '#000')}>
+        <button onClick={() => addShapeElement('rectangle', selectedColor)}>
           四角形追加
         </button>
-        <button onClick={() => addShapeElement('circle', '#000')}>
+        <button onClick={() => addShapeElement('circle', selectedColor)}>
           円追加
         </button>
         <button onClick={() => setSelectedElement(null)} disabled={!selectedElement}>

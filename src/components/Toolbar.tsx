@@ -1,9 +1,19 @@
 import React, { useState } from 'react';
 
-const Toolbar: React.FC = () => {
+interface ToolbarProps {
+  selectedColor: string;
+  setSelectedColor: (color: string) => void;
+  fontSize: number;
+  setFontSize: (size: number) => void;
+}
+
+const Toolbar: React.FC<ToolbarProps> = ({ 
+  selectedColor, 
+  setSelectedColor, 
+  fontSize, 
+  setFontSize 
+}) => {
   const [selectedTool, setSelectedTool] = useState<string>('select');
-  const [selectedColor, setSelectedColor] = useState<string>('#000000');
-  const [fontSize, setFontSize] = useState<number>(16);
 
   const colors = [
     '#000000', '#ffffff', '#ff0000', '#00ff00', '#0000ff',
