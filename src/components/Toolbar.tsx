@@ -43,29 +43,6 @@ const Toolbar: React.FC<ToolbarProps> = ({
 
   return (
     <div className="toolbar">
-      <div className="tool-section">
-        <h3>ツール</h3>
-        <div className="tool-buttons">
-          <button 
-            className={selectedTool === 'select' ? 'active' : ''}
-            onClick={() => setSelectedTool('select')}
-          >
-            選択
-          </button>
-          <button 
-            className={selectedTool === 'text' ? 'active' : ''}
-            onClick={() => setSelectedTool('text')}
-          >
-            テキスト
-          </button>
-          <button 
-            className={selectedTool === 'shape' ? 'active' : ''}
-            onClick={() => setSelectedTool('shape')}
-          >
-            図形
-          </button>
-        </div>
-      </div>
 
       <div className="tool-section">
         <h3>カラー</h3>
@@ -103,7 +80,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
 
       <div className="tool-section">
         <h3>エクスポート</h3>
-        <button onClick={exportAsPNG}>PNG保存</button>
+        <button onClick={exportAsPNG} style={{ marginRight: '0.5rem' }}>PNG保存</button>
         <button onClick={exportAsPDF}>PDF保存</button>
       </div>
     </div>

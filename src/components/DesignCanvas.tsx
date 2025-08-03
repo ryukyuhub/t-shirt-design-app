@@ -27,6 +27,8 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedColor, fontSize: gl
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [showTextInput, setShowTextInput] = useState(false);
   const [inputText, setInputText] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imageCache, setImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
 
   const CANVAS_WIDTH = 400;
   const CANVAS_HEIGHT = 500;
@@ -61,6 +63,11 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedColor, fontSize: gl
           ctx.arc(element.x, element.y, (element.width || 50) / 2, 0, 2 * Math.PI);
           ctx.fill();
         }
+      } else if (element.type === 'image' && element.src) {
+        const cachedImage = imageCache.get(element.src);
+        if (cachedImage && cachedImage.complete) {
+          ctx.drawImage(cachedImage, element.x, element.y, element.width || 100, element.height || 100);
+        }
       }
       
       // Highlight selected element
@@ -71,12 +78,14 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedColor, fontSize: gl
           const textWidth = getTextWidth(element.content || '', element.fontSize || 16);
           const textHeight = element.fontSize || 16;
           ctx.strokeRect(element.x - 2, element.y - textHeight - 2, textWidth + 4, textHeight + 4);
+        } else if (element.type === 'image') {
+          ctx.strokeRect(element.x - 2, element.y - 2, (element.width || 100) + 4, (element.height || 100) + 4);
         } else {
           ctx.strokeRect(element.x - 2, element.y - 2, (element.width || 50) + 4, (element.height || 50) + 4);
         }
       }
     });
-  }, [elements, selectedElement]);
+  }, [elements, selectedElement, imageCache]);
 
   // ESCキーで選択解除
   useEffect(() => {
@@ -127,6 +136,11 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedColor, fontSize: gl
           clickX: x,
           clickY: y
         }); // デバッグ用
+        return hit;
+      } else if (element.type === 'image') {
+        const hit = x >= element.x && x <= element.x + (element.width || 100) &&
+                   y >= element.y && y <= element.y + (element.height || 100);
+        console.log('Image element hit test:', hit); // デバッグ用
         return hit;
       } else {
         const hit = x >= element.x && x <= element.x + (element.width || 50) &&
@@ -207,6 +221,54 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedColor, fontSize: gl
     setInputText('');
   };
 
+  const handleImageUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageSrc = e.target?.result as string;
+        if (imageSrc) {
+          // 画像をキャッシュに追加
+          const img = new Image();
+          img.onload = () => {
+            setImageCache(prev => new Map(prev.set(imageSrc, img)));
+            // キャンバスを再描画
+            const canvas = canvasRef.current;
+            if (canvas) {
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                // 再描画をトリガー
+                setElements(prev => [...prev]);
+              }
+            }
+          };
+          img.src = imageSrc;
+
+          // 画像要素を追加
+          const newElement: DesignElement = {
+            id: Date.now().toString(),
+            type: 'image',
+            x: 200,
+            y: 200,
+            width: 100,
+            height: 100,
+            src: imageSrc
+          };
+          setElements(prev => [...prev, newElement]);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+    // ファイル入力をリセット
+    if (event.target) {
+      event.target.value = '';
+    }
+  };
+
   const addShapeElement = (shapeType: 'rectangle' | 'circle', color: string) => {
     const newElement: DesignElement = {
       id: Date.now().toString(),
@@ -249,6 +311,9 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedColor, fontSize: gl
         <button onClick={() => addShapeElement('circle', selectedColor)}>
           円追加
         </button>
+        <button onClick={handleImageUpload}>
+          画像追加
+        </button>
         <button onClick={() => setSelectedElement(null)} disabled={!selectedElement}>
           選択解除
         </button>
@@ -280,6 +345,14 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedColor, fontSize: gl
           </div>
         </div>
       )}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        style={{ display: 'none' }}
+      />
     </div>
   );
 };
