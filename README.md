@@ -1,6 +1,7 @@
 # Tシャツデザインアプリ
 
-ReactとHTML5 Canvasを使用したシンプルなTシャツデザイン作成ツールです。
+ReactとHTML5 Canvasを使用したシンプルなTシャツデザイン作成ツールです。<br>
+Claude Code を利用して40分で作りました。
 
 ## 機能
 
